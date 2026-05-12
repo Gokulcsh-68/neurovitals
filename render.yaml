@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: neurovitals-api
+    runtime: docker
+    plan: starter # ML models require more than the 512MB free tier
+    region: ohio
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: PYTHON_VERSION
+        value: 3.10.0

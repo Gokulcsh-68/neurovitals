@@ -5,6 +5,8 @@ from typing import List
 
 
 def bandpass_filter(signal: np.ndarray, fs: float = 30.0, low_hz: float = 0.7, high_hz: float = 4.0):
+    if len(signal) < 21: # Min length for 3rd order filtfilt and padding
+        return signal
     nyq = 0.5 * fs
     low = low_hz / nyq
     high = high_hz / nyq
@@ -82,7 +84,11 @@ class RPPGExtractor:
             }
         except Exception as e:
             print(f"[NeuroVitals] [RPPG_EXTRACTOR] ERROR in extract: {e}")
-            return np.array([])
+            return {
+                "pulse_signal": np.array([]),
+                "r_ratio": 1.0,
+                "b_ratio": 1.0
+            }
 
 
 def cv2_mean_rgb(frame: np.ndarray):

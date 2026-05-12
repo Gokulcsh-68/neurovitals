@@ -1,0 +1,1 @@
+uvicorn api.server:app --reload --host [IP_ADDRESS] --port 8000

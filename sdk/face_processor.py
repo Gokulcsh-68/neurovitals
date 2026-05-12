@@ -85,7 +85,11 @@ class FaceProcessor:
             # Use the first face detected
             face = faces[0]
             gender_val = "male" if face.gender == 1 else "female"
-            age_val = int(face.age)
+            
+            try:
+                age_val = int(face.age) if not np.isnan(face.age) else 35
+            except (TypeError, ValueError):
+                age_val = 35
             
             return {
                 "gender": gender_val,

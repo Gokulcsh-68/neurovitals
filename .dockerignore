@@ -1,0 +1,13 @@
+.git
+__pycache__
+venv
+.venv
+_logs
+sdk/_models
+*.avi
+*.webm
+*.mp4
+live_test.html
+.vscode
+.idea
+*.log

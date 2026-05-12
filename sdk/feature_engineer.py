@@ -36,6 +36,8 @@ def compute_breathing_rate(signal: np.ndarray, fs: float = 30.0) -> float:
         from scipy.signal import butter, filtfilt
         nyq = 0.5 * fs
         b, a = butter(2, [0.1 / nyq, 0.4 / nyq], btype="band")
+        if len(signal) < 21:
+             return 16.0
         resp_signal = filtfilt(b, a, signal)
         
         # Count peaks in the respiratory signal
@@ -92,6 +94,8 @@ def estimate_biometric_risks(hr: float, hrv: float, bp_sys: float, age: int) -> 
 
 def calculate_heart_age(actual_age: int, hr: float, hrv: float, sys: float) -> int:
     """Estimated physiological Heart Age relative to actual age."""
+    if any(math.isnan(v) for v in (hr, hrv, sys)):
+        return actual_age
     # HR > 80 adds years, HRV < 30 adds years, SYS > 130 adds years
     modifier = (hr - 70) * 0.2 + (float(max(0.0, float(40.0 - hrv)))) * 0.3 + (sys - 120) * 0.4
     return int(np.clip(actual_age + modifier, 18, 90))
@@ -421,7 +425,10 @@ def generate_trend_data(signal: np.ndarray, fs: float = 30.0) -> Dict[str, List[
     from scipy.signal import butter, filtfilt
     nyq = 0.5 * fs
     b, a = butter(2, [0.1 / nyq, 0.4 / nyq], btype="band")
-    resp_wave = filtfilt(b, a, signal)
+    if len(signal) > 21:
+        resp_wave = filtfilt(b, a, signal)
+    else:
+        resp_wave = signal
     # Downsample breathing wave for efficiency
     resp_trend = [float(val) for val in resp_wave[::5]]
     
@@ -474,6 +481,8 @@ def extract_all_features(signal: np.ndarray, fs: float = 30.0,
     # 1. Advanced BP: Use Morphological Data
     morph = extract_morphological_features(signal, fs)
     bp = compute_blood_pressure(hr, morph)
+    if bp is None:
+        bp = {"sys": 120.0, "dia": 80.0}
     
     # 2. Advanced SpO2: Use Calibrated Model if ratios available
     if r_ratio is not None and b_ratio is not None:
